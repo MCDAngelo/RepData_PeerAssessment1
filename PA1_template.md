@@ -1,13 +1,9 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 ## Loading and preprocessing the data
 
-```{r setup}
+
+```r
 setwd("~/Dropbox/RTutorials/Coursera5-ReproducibleResearch/RepData_PeerAssessment1")
 unzip("activity.zip")
 data <- read.csv("activity.csv", header = TRUE,
@@ -18,7 +14,8 @@ data$date_type <- as.Date(data$date)
 
 ## What is mean total number of steps taken per day?
 
-```{r part_1}
+
+```r
 library(plyr)
 library(ggplot2)
 steps_day <- ddply(data, .(date_type), summarise,
@@ -31,17 +28,22 @@ ggplot(steps_day, aes(x=totalSteps)) +
     xlab("Total Steps Per Day") + ylab("Count") +
     ggtitle("Histogram of Total Steps Per Day")+
     theme_bw()
+```
 
+![](PA1_template_files/figure-html/part_1-1.png) 
+
+```r
 meanSteps <- mean(steps_day$totalSteps, na.rm = TRUE)
 medianSteps <- median(steps_day$totalSteps, na.rm = TRUE)
 ```
 
-The mean number of steps taken per day is `r round(meanSteps,0)`, excluding the missing values, while the median number of steps taken per day is `r medianSteps`.
+The mean number of steps taken per day is 9354, excluding the missing values, while the median number of steps taken per day is 10395.
 
 
 ## What is the average daily activity pattern?
 
-```{r part_2}
+
+```r
 steps_int <- ddply(data, .(interval), summarise,
                    meanSteps = mean(steps, na.rm = TRUE))
 
@@ -50,13 +52,17 @@ ggplot(steps_int, aes(y=meanSteps, x=interval, group = 1)) +
     xlab("Interval") + ylab("Mean Number of Steps") +
     ggtitle("Mean Number of Steps Per Interval")+
     theme_bw()
+```
 
+![](PA1_template_files/figure-html/part_2-1.png) 
+
+```r
 maxValue <- max(steps_int$meanSteps)
 maxIndex <- which.max(steps_int$meanSteps)
 maxInterval <- steps_int[maxIndex,1]
 ```
 
-The `r maxInterval`th interval is the five-minute interval which contains, on average across all days in the data set, the maximum number of steps, with `r round(maxValue,0)` steps on average.
+The 835th interval is the five-minute interval which contains, on average across all days in the data set, the maximum number of steps, with 206 steps on average.
 
 ## Imputing missing values
 
