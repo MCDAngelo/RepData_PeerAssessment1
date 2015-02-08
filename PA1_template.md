@@ -6,10 +6,14 @@
 ```r
 options(scipen=999) #to remove scientific notation
 setwd("~/Dropbox/RTutorials/Coursera5-ReproducibleResearch/RepData_PeerAssessment1")
-unzip("activity.zip")
+
+#if the activity file hasn't been unzipped, unzip it
+if (!("activity.csv" %in% list.files(".")))  unzip("activity.zip")
+
 data <- read.csv("activity.csv", header = TRUE,
                  stringsAsFactors = FALSE)
-#create new variable for date as class date
+
+#make date variable of class date
 data$date <- as.Date(data$date)
 ```
 
@@ -19,21 +23,23 @@ data$date <- as.Date(data$date)
 ```r
 library(plyr)
 library(ggplot2)
+
+#calculate the total number of steps for each date, excluding NA values
 steps_day <- ddply(data, .(date), summarise,
                    totalSteps = sum(steps, na.rm = TRUE))
 
+#create histogram using ggplot & geom_histogram
 ggplot(steps_day, aes(x=totalSteps)) + 
     geom_histogram(binwidth=2000, colour="black", fill="white") +
-    geom_vline(aes(xintercept=mean(totalSteps, na.rm=TRUE)),# Ignore NA values for mean
-               color="red", linetype="dashed", size=1) +
     xlab("Total Steps Per Day") + ylab("Count") +
-    ggtitle("Histogram of Total Steps Per Day")+
+    ggtitle("Histogram of Total Steps Per Day - Missing Values Removed")+
     theme_bw()
 ```
 
 ![](PA1_template_files/figure-html/part_1-1.png) 
 
 ```r
+#calcualte mean and median number of steps across days
 meanSteps <- mean(steps_day$totalSteps, na.rm = TRUE)
 medianSteps <- median(steps_day$totalSteps, na.rm = TRUE)
 ```
@@ -45,12 +51,15 @@ The mean number of steps taken per day is 9354, excluding the missing values, wh
 
 
 ```r
+#calculate the average number of steps for each interval, across dates
+#excluding NA values
 steps_int <- ddply(data, .(interval), summarise,
                    meanSteps = mean(steps, na.rm = TRUE),
                    sdSteps = sd(steps, na.rm = TRUE))
 
+#plot the average daily activity pattern using ggplot & geom_line
 ggplot(steps_int, aes(y=meanSteps, x=interval, group = 1)) + 
-    geom_line() + geom_point() +
+    geom_line(color = "blue", alpha = 0.7) +
     xlab("Interval") + ylab("Mean Number of Steps") +
     ggtitle("Mean Number of Steps Per Interval")+
     theme_bw()
@@ -59,16 +68,18 @@ ggplot(steps_int, aes(y=meanSteps, x=interval, group = 1)) +
 ![](PA1_template_files/figure-html/part_2-1.png) 
 
 ```r
+#calculate the max value, use which.max to get the index for the max
+#and use the index to get the interval with the max number of steps
 maxValue <- max(steps_int$meanSteps)
 maxIndex <- which.max(steps_int$meanSteps)
 maxInterval <- steps_int[maxIndex,1]
 ```
 
-The 835th interval is the five-minute interval which contains, on average across all days in the data set, the maximum number of steps, with 206 steps on average.
+The 835th interval is the five-minute interval which contains, the maximum number of steps (on average across all days in the data set), with 206.
 
 ## Imputing missing values
 
-I will impute based on the average for the given interval across the other days that do not have missing values.
+Here I will impute missing values based on the average for the given interval across the other days that do not have missing values.
 
 
 ```r
@@ -80,19 +91,18 @@ ind_rows <- ind[,1]
 #repeated 61 times to match average for the interval with value for each day
 int_means <- rep(steps_int$meanSteps,61)
 
-#copt data into data_filled and then
+#copy data into data_filled and then
 #replace NA values (as indicated by ind_rows) with means from int_means
 data_filled <- data
 data_filled$steps[ind_rows] <- int_means[ind_rows]
 
-#histogram of total steps with imputed NA values
+#calculate the total number of steps for each date
 steps_day_filled <- ddply(data_filled, .(date), summarise,
                    totalSteps = sum(steps))
 
+#create histogram using ggplot & geom_histogram
 ggplot(steps_day_filled, aes(x=totalSteps)) + 
     geom_histogram(binwidth=2000, colour="black", fill="white") +
-    geom_vline(aes(xintercept=mean(totalSteps)),# Ignore NA values for mean
-               color="red", linetype="dashed", size=1) +
     xlab("Total Steps Per Day") + ylab("Count") +
     ggtitle("Histogram of Total Steps Per Day - Missing Values Imputed")+
     theme_bw()
@@ -101,17 +111,9 @@ ggplot(steps_day_filled, aes(x=totalSteps)) +
 ![](PA1_template_files/figure-html/part_3-1.png) 
 
 ```r
+#calculate the mean and median number of steps across days
 meanSteps_filled <- mean(steps_day_filled$totalSteps)
 medianSteps_filled <- median(steps_day_filled$totalSteps)
-meanSteps_filled; medianSteps_filled
-```
-
-```
-## [1] 10766.19
-```
-
-```
-## [1] 10766.19
 ```
 
 With the imputed values, the mean and median are equivalent: mean = 10766 and median = 10766. By imputing the missing values using the mean number of steps for the given interval across the other days, the mean and median number of steps taken per day has increased from the estimates calculated when we excluded missing values (estimates excluding missing values: mean = 9354 and median = 10395).
@@ -150,14 +152,18 @@ data_filled$date_type <- weekdays(data_filled$date)
 data_filled <- mutate(data_filled, 
                        Weekday_Type = (ifelse(weekdays(date) %in% c("Saturday", "Sunday"), "Weekend", "Weekday")))
 
+#re-order the weekday type variable to later make Weekend first on the graph
 data_filled$Weekday_Type <- factor(data_filled$Weekday_Type, levels = c("Weekend", "Weekday"))
 
+#calcualte the mean number of steps as a funciton of interval and weekday type
 steps_int_weekend <- ddply(data_filled, .(interval,Weekday_Type), 
                            summarise,
                            meanSteps = mean(steps))
 
+#plot the average daily activity pattern using ggplot & geom_line
+#use facet_grid to plot weekday and weekend separately
 ggplot(steps_int_weekend, aes(y=meanSteps, x=interval, group = 1)) + 
-    geom_line(alpha = 0.7) + geom_point(alpha = 0.7) +
+    geom_line(color = "blue", alpha = 0.7) +
     facet_grid(Weekday_Type~.) +
     xlab("Interval") + ylab("Mean Number of Steps") +
     ggtitle("Mean Number of Steps Per Interval for Weekends and Weekdays")+
@@ -167,11 +173,11 @@ ggplot(steps_int_weekend, aes(y=meanSteps, x=interval, group = 1)) +
 ![](PA1_template_files/figure-html/part_4-1.png) 
 
 ```r
-#Examine differences between weekdays and weekends
+#Examine differences in max, min, and mean values between weekdays and weekends
 weekend_step_data <- group_by(steps_int_weekend, Weekday_Type)
 weekend_summary <- summarise(weekend_step_data, Max = max(meanSteps), 
           Min = min(meanSteps), 
           Mean = mean(meanSteps))
 ```
 
-In comparing activity patterns between weekdays and weekends, an interesting pattern emerges. Although the maximum number of steps by interval is greater on weekdays (230.3781971) than on weekends (166.6391509), the average number of steps across intervals is greater on weekends (35.6105812) than on weekdays (35.6105812).
+In comparing activity patterns between weekdays and weekends, an interesting pattern emerges. Although the maximum number of steps by interval is greater on weekdays (230) than on weekends (167), the average number of steps across intervals is greater on weekends (42) than on weekdays (36).
