@@ -1,4 +1,9 @@
-# Reproducible Research: Peer Assessment 1
+---
+title: "Reproducible Research: Peer Assessment 1"
+output: 
+  html_document:
+    keep_md: true
+---
 
 ## Loading and preprocessing the data
 
@@ -36,12 +41,25 @@ ggplot(steps_day, aes(x=totalSteps)) +
     theme_bw()
 ```
 
-![](PA1_template_files/figure-html/part_1-1.png) 
+![plot of chunk part_1](figure/part_1-1.png) 
 
 ```r
 #calcualte mean and median number of steps across days
 meanSteps <- mean(steps_day$totalSteps, na.rm = TRUE)
+meanSteps
+```
+
+```
+## [1] 9354.23
+```
+
+```r
 medianSteps <- median(steps_day$totalSteps, na.rm = TRUE)
+medianSteps
+```
+
+```
+## [1] 10395
 ```
 
 The mean number of steps taken per day is 9354, excluding the missing values, while the median number of steps taken per day is 10395.
@@ -65,7 +83,7 @@ ggplot(steps_int, aes(y=meanSteps, x=interval, group = 1)) +
     theme_bw()
 ```
 
-![](PA1_template_files/figure-html/part_2-1.png) 
+![plot of chunk part_2](figure/part_2-1.png) 
 
 ```r
 #calculate the max value, use which.max to get the index for the max
@@ -73,6 +91,20 @@ ggplot(steps_int, aes(y=meanSteps, x=interval, group = 1)) +
 maxValue <- max(steps_int$meanSteps)
 maxIndex <- which.max(steps_int$meanSteps)
 maxInterval <- steps_int[maxIndex,1]
+
+maxValue
+```
+
+```
+## [1] 206.1698
+```
+
+```r
+maxInterval
+```
+
+```
+## [1] 835
 ```
 
 The 835th interval is the five-minute interval which contains, the maximum number of steps (on average across all days in the data set), with 206.
@@ -108,12 +140,25 @@ ggplot(steps_day_filled, aes(x=totalSteps)) +
     theme_bw()
 ```
 
-![](PA1_template_files/figure-html/part_3-1.png) 
+![plot of chunk part_3](figure/part_3-1.png) 
 
 ```r
 #calculate the mean and median number of steps across days
 meanSteps_filled <- mean(steps_day_filled$totalSteps)
+meanSteps_filled
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 medianSteps_filled <- median(steps_day_filled$totalSteps)
+medianSteps_filled
+```
+
+```
+## [1] 10766.19
 ```
 
 With the imputed values, the mean and median are equivalent: mean = 10766 and median = 10766. By imputing the missing values using the mean number of steps for the given interval across the other days, the mean and median number of steps taken per day has increased from the estimates calculated when we excluded missing values (estimates excluding missing values: mean = 9354 and median = 10395).
@@ -123,27 +168,6 @@ With the imputed values, the mean and median are equivalent: mean = 10766 and me
 
 ```r
 library(dplyr)
-```
-
-```
-## 
-## Attaching package: 'dplyr'
-## 
-## The following objects are masked from 'package:plyr':
-## 
-##     arrange, count, desc, failwith, id, mutate, rename, summarise,
-##     summarize
-## 
-## The following object is masked from 'package:stats':
-## 
-##     filter
-## 
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union
-```
-
-```r
 #create a variable with the actual weekday label to confirm 
 #that weekend/weekday classification is done correctly
 data_filled$date_type <- weekdays(data_filled$date)
@@ -170,7 +194,7 @@ ggplot(steps_int_weekend, aes(y=meanSteps, x=interval, group = 1)) +
     theme_bw()
 ```
 
-![](PA1_template_files/figure-html/part_4-1.png) 
+![plot of chunk part_4](figure/part_4-1.png) 
 
 ```r
 #Examine differences in max, min, and mean values between weekdays and weekends
@@ -178,6 +202,15 @@ weekend_step_data <- group_by(steps_int_weekend, Weekday_Type)
 weekend_summary <- summarise(weekend_step_data, Max = max(meanSteps), 
           Min = min(meanSteps), 
           Mean = mean(meanSteps))
+weekend_summary
+```
+
+```
+## Source: local data frame [2 x 4]
+## 
+##   Weekday_Type      Max Min     Mean
+## 1      Weekend 166.6392   0 42.36640
+## 2      Weekday 230.3782   0 35.61058
 ```
 
 In comparing activity patterns between weekdays and weekends, an interesting pattern emerges. Although the maximum number of steps by interval is greater on weekdays (230) than on weekends (167), the average number of steps across intervals is greater on weekends (42) than on weekdays (36).

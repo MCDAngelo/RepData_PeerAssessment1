@@ -40,7 +40,10 @@ ggplot(steps_day, aes(x=totalSteps)) +
 
 #calcualte mean and median number of steps across days
 meanSteps <- mean(steps_day$totalSteps, na.rm = TRUE)
+meanSteps
+
 medianSteps <- median(steps_day$totalSteps, na.rm = TRUE)
+medianSteps
 ```
 
 The mean number of steps taken per day is `r round(meanSteps,0)`, excluding the missing values, while the median number of steps taken per day is `r medianSteps`.
@@ -67,6 +70,9 @@ ggplot(steps_int, aes(y=meanSteps, x=interval, group = 1)) +
 maxValue <- max(steps_int$meanSteps)
 maxIndex <- which.max(steps_int$meanSteps)
 maxInterval <- steps_int[maxIndex,1]
+
+maxValue
+maxInterval
 ```
 
 The `r maxInterval`th interval is the five-minute interval which contains, the maximum number of steps (on average across all days in the data set), with `r round(maxValue,0)`.
@@ -102,14 +108,17 @@ ggplot(steps_day_filled, aes(x=totalSteps)) +
 
 #calculate the mean and median number of steps across days
 meanSteps_filled <- mean(steps_day_filled$totalSteps)
+meanSteps_filled
+
 medianSteps_filled <- median(steps_day_filled$totalSteps)
+medianSteps_filled
 ```
 
 With the imputed values, the mean and median are equivalent: mean = `r round(meanSteps_filled,0)` and median = `r round(medianSteps_filled,0)`. By imputing the missing values using the mean number of steps for the given interval across the other days, the mean and median number of steps taken per day has increased from the estimates calculated when we excluded missing values (estimates excluding missing values: mean = `r round(meanSteps,0)` and median = `r medianSteps`).
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r part_4}
+```{r part_4, message=FALSE}
 library(dplyr)
 #create a variable with the actual weekday label to confirm 
 #that weekend/weekday classification is done correctly
@@ -141,6 +150,7 @@ weekend_step_data <- group_by(steps_int_weekend, Weekday_Type)
 weekend_summary <- summarise(weekend_step_data, Max = max(meanSteps), 
           Min = min(meanSteps), 
           Mean = mean(meanSteps))
+weekend_summary
 
 ```
 
