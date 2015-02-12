@@ -44,7 +44,7 @@ ggplot(steps_day, aes(x=totalSteps)) +
 ![plot of chunk part_1](figure/part_1-1.png) 
 
 ```r
-#calcualte mean and median number of steps across days
+#calculate mean and median number of steps across days
 meanSteps <- mean(steps_day$totalSteps, na.rm = TRUE)
 meanSteps
 ```
@@ -62,8 +62,7 @@ medianSteps
 ## [1] 10395
 ```
 
-The mean number of steps taken per day is 9354, excluding the missing values, while the median number of steps taken per day is 10395.
-
+The mean number of steps taken per day is 9354, excluding the missing values, while the median number of steps taken per day is 10395.  
 
 ## What is the average daily activity pattern?
 
@@ -107,20 +106,20 @@ maxInterval
 ## [1] 835
 ```
 
-The 835th interval is the five-minute interval which contains, the maximum number of steps (on average across all days in the data set), with 206.
+The 835th interval is the five-minute interval containing the maximum number of steps (on average across all days in the data set), with 206 steps.  
 
 ## Imputing missing values
 
-Here I will impute missing values based on the average for the given interval across the other days that do not have missing values.
+Here I will impute missing values based on the average for the given interval across the other days that did not have missing values (calculated in the previous step).  
 
 
 ```r
-#get index of rows containing NA values for steps
+#get index of rows containing NA values for steps 
 ind <- which(is.na(data), arr.ind = TRUE)
 ind_rows <- ind[,1]
 
-#create a vector int_means with averages for each interval across days
-#repeated 61 times to match average for the interval with value for each day
+#create a vector int_means with the averages for each interval across days
+#repeated 61 times to line up with the intervals for each day
 int_means <- rep(steps_int$meanSteps,61)
 
 #copy data into data_filled and then
@@ -174,12 +173,13 @@ data_filled$date_type <- weekdays(data_filled$date)
 
 #create a variable to label weekend/weekday
 data_filled <- mutate(data_filled, 
-                       Weekday_Type = (ifelse(weekdays(date) %in% c("Saturday", "Sunday"), "Weekend", "Weekday")))
+                       Weekday_Type = (ifelse(weekdays(date) %in% c("Saturday", "Sunday"), 
+                                              "Weekend", "Weekday")))
 
-#re-order the weekday type variable to later make Weekend first on the graph
+#re-order the weekday type variable to later make Weekend appear above on the graph
 data_filled$Weekday_Type <- factor(data_filled$Weekday_Type, levels = c("Weekend", "Weekday"))
 
-#calcualte the mean number of steps as a funciton of interval and weekday type
+#calculate the mean number of steps as a function of interval and weekday type
 steps_int_weekend <- ddply(data_filled, .(interval,Weekday_Type), 
                            summarise,
                            meanSteps = mean(steps))
